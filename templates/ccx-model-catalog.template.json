@@ -1,0 +1,17 @@
+{
+  "models": [
+    {
+      "slug": "codex",
+      "display_name": "CCX codex route",
+      "supported_in_api": true,
+      "visibility": "list",
+      "priority": 0,
+      "supported_reasoning_levels": [
+        { "effort": "low", "description": "Fast responses" },
+        { "effort": "medium", "description": "Balanced reasoning" },
+        { "effort": "high", "description": "Deeper reasoning" },
+        { "effort": "xhigh", "description": "Highest reasoning" }
+      ]
+    }
+  ]
+}
