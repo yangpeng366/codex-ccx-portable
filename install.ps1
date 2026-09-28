@@ -8,6 +8,7 @@ param(
     [string]$CcxConfigPath = '',
     [string]$CcxBinaryPath = '',
     [string]$ModelCatalogPath = '',
+    [switch]$SkipCodexInstall,
     [switch]$NoAutoStart,
     [switch]$SkipSmokeTest
 )
@@ -53,6 +54,34 @@ function Wait-CcxHealth {
         Start-Sleep -Seconds 2
     }
     throw "CCX did not become healthy at $Uri within $Seconds seconds"
+}
+
+function Update-CurrentPath {
+    $machinePath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    $env:Path = "$machinePath;$userPath"
+}
+
+function Install-CodexCli {
+    if (Get-Command codex -ErrorAction SilentlyContinue) { return }
+    if (-not (Get-Command winget.exe -ErrorAction SilentlyContinue)) {
+        if (Get-Command npm.cmd -ErrorAction SilentlyContinue) {
+            & npm.cmd install -g '@openai/codex@latest'
+            if ($LASTEXITCODE -ne 0) { throw "npm failed to install Codex with exit code $LASTEXITCODE" }
+            Update-CurrentPath
+        }
+    } else {
+        & winget.exe install --id OpenAI.Codex --exact --silent --accept-package-agreements --accept-source-agreements
+        if ($LASTEXITCODE -ne 0) { throw "winget failed to install Codex with exit code $LASTEXITCODE" }
+        Update-CurrentPath
+    }
+    if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
+        throw 'Codex CLI was not found after installation. Open a new terminal and rerun install.ps1.'
+    }
+}
+
+if (-not $SkipCodexInstall) {
+    Install-CodexCli
 }
 
 if (-not $CcxConfigPath) {

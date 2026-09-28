@@ -1,0 +1,41 @@
+worker_processes 1;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
+    server {
+        listen 127.0.0.1:__PORT__ ssl;
+        server_name 127.0.0.1 localhost;
+
+        ssl_certificate     __NGINX_ROOT__/conf/cert.pem;
+        ssl_certificate_key __NGINX_ROOT__/conf/cert.key;
+        ssl_protocols       TLSv1.2 TLSv1.3;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_ssl_server_name on;
+        proxy_buffering off;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+
+        location /minimax/     { proxy_pass https://api.minimaxi.com/; }
+        location /siliconflow/ { proxy_pass https://api.siliconflow.cn/; }
+        location /stepfun/     { proxy_pass https://api.stepfun.com/; }
+        location /qiniu/       { proxy_pass https://api.qiniu.com/; }
+
+        location = /nginx-health {
+            access_log off;
+            return 200 "ok\n";
+        }
+    }
+}

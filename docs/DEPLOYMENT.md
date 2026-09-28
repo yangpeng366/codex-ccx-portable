@@ -27,6 +27,24 @@
 3. 当前稳定参数为 262K 上下文、200K 自动压缩阈值；不要直接恢复旧 500K 配置。
 4. 所有上游渠道密钥保存在 CCX `config.json`；不要把该文件放进公开仓库。
 
+## 预置环境
+
+`bootstrap.ps1` 是兼容 Windows PowerShell 5.1 的入口；它自动安装 PowerShell 7、Git 与 Node.js LTS，再调用主安装器。`-InstallNginx` 额外安装本机 Nginx 反代。
+
+主安装器默认检查 Codex CLI；不存在时优先用 `winget install OpenAI.Codex`，若 winget 不可用则回退 npm。
+
+## Nginx
+
+| 项 | 值 |
+|---|---|
+| 安装根 | `%LOCALAPPDATA%\Programs\nginx` |
+| 监听 | `127.0.0.1:8443` |
+| 配置 | `%LOCALAPPDATA%\Programs\nginx\conf\nginx.conf` |
+| 证书 | `conf/cert.pem` / `conf/cert.key` |
+| 探活 | `https://127.0.0.1:8443/nginx-health` |
+
+Nginx 仅面向本机 CCX 出口复用，不暴露公网。自签证书配合 CCX 渠道 `insecureSkipVerify=true`；上游 TLS 仍由 Nginx 校验。
+
 ## 新机排障
 
 1. `/health` 不通：确认 `ccx-go` 进程与 3688 端口；冷启动最长可等待约一分钟。
