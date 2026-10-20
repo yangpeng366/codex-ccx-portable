@@ -3,7 +3,7 @@
 Windows 上一键部署 OpenAI Codex CLI + 本地 CCX 代理的启动包。项目分两层：
 
 - 公开包：安装脚本、Codex 配置模板、健康巡检与文档，不含上游 API Key。
-- 私有包：由源机器用 `build-portable.ps1 -Private` 生成，额外携带 CCX 可执行文件、CCX 渠道配置、Codex 模型目录和本地代理令牌。
+- 私有包：由源机器用 `build-portable.ps1 -Private` 生成，携带 CCX 渠道配置、Codex 模型目录和本地代理令牌；CCX 可执行文件不再打包，改由官方下载提供。
 
 私有包等同凭据，只能通过可信通道分发，不得发布到 GitHub 或对象存储公开桶。
 
@@ -22,7 +22,7 @@ Windows 上一键部署 OpenAI Codex CLI + 本地 CCX 代理的启动包。项�
 - Windows 10/11；`bootstrap.ps1` 可自动安装 PowerShell 7、Git 与 Node.js LTS。
 - 能访问上游模型服务；本脚本只开放本地 `127.0.0.1:3688`。
 - Node.js 22 与 npm 已在 PATH，或可用 `winget` 安装 Codex。
-- 若使用私有包，无需手工安装 CCX Desktop；安装器会携带并启动 `ccx-go.exe`。
+- CCX Desktop 从官方渠道下载安装；`ccx-go.exe` 不再随私有包分发，安装器默认使用官方安装路径，也可用 `-CcxBinaryPath` 指定。
 
 ## 快速开始
 
@@ -50,13 +50,15 @@ pwsh -NoProfile -File .\build-portable.ps1 -Private
 pwsh -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
+Codex CLI、ChatGPT/Codex 桌面端与 CCX 均可通过官方下载获取，本项目不再内置三者的任何二进制。
+
 脚本会完成：
 
 1. 安装 PowerShell 7、Git、Node.js LTS（已存在则跳过）。
 2. 安装 Codex CLI；已存在时可传 `-SkipCodexInstall`。
 3. 备份并写入 `%USERPROFILE%\.codex\config.toml` 与 `auth.json`。
 4. 写入私有模型目录；无私有目录时省略 `model_catalog_json`。
-5. 复制 CCX 配置与 `ccx-go.exe` 到用户目录。
+5. 复制 CCX 配置到用户目录（CCX 程序由官方安装提供，不再随包分发）。
 6. 注册登录自启任务 `CodexCcxPortable`。
 7. 等待 `/health` 返回 healthy，并执行一次 Codex smoke test。
 

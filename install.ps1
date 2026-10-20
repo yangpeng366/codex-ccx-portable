@@ -88,8 +88,8 @@ if (-not $CcxConfigPath) {
     $CcxConfigPath = Join-Path $privateDir 'ccx-config.json'
 }
 if (-not $CcxBinaryPath) {
-    $installedBinary = 'C:\Program Files\CCX\CCX Desktop\ccx-go.exe'
-    $CcxBinaryPath = if (Test-Path -LiteralPath (Join-Path $privateDir 'ccx-go.exe')) { Join-Path $privateDir 'ccx-go.exe' } else { $installedBinary }
+    # CCX 不再随私有包分发；走官方下载安装到官方默认路径，或传 -CcxBinaryPath 指定。
+    $CcxBinaryPath = 'C:\Program Files\CCX\CCX Desktop\ccx-go.exe'
 }
 if (-not $ModelCatalogPath) {
     $privateCatalog = Join-Path $privateDir 'ccx-model-catalog.json'
@@ -97,7 +97,7 @@ if (-not $ModelCatalogPath) {
 }
 
 $CcxConfigPath = Assert-File $CcxConfigPath 'CCX config'
-$CcxBinaryPath = Assert-File $CcxBinaryPath 'CCX binary'
+$CcxBinaryPath = Assert-File $CcxBinaryPath 'CCX binary（请先通过官方渠道下载安装 CCX Desktop）'
 $configTemplate = Assert-File (Join-Path $repoRoot 'templates\config.template.toml') 'Codex config template'
 
 if (-not $ProxyToken) {

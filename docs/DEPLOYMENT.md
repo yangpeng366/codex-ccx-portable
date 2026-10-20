@@ -33,6 +33,8 @@
 
 主安装器默认检查 Codex CLI；不存在时优先用 `winget install OpenAI.Codex`，若 winget 不可用则回退 npm。
 
+CCX 二进制（`ccx-go.exe`）自 2026-10-20 起不再随私有包分发；新机通过官方渠道下载安装 CCX Desktop（默认路径 `%ProgramFiles%\CCX\CCX Desktop\ccx-go.exe`），或传 `-CcxBinaryPath` 指定。Codex CLI、ChatGPT/Codex 桌面端与 CCX 均可走官方下载，本项目不再内置三者二进制。
+
 ## Nginx
 
 | 项 | 值 |

@@ -2,7 +2,6 @@
 param(
     [switch]$Private,
     [string]$SourceCcxConfigPath = "$env:APPDATA\ccx-desktop\.config\config.json",
-    [string]$SourceCcxBinaryPath = 'C:\Program Files\CCX\CCX Desktop\ccx-go.exe',
     [string]$SourceCodexConfigPath = "$env:USERPROFILE\.codex\config.toml",
     [string]$SourceModelCatalogPath = "$env:USERPROFILE\.codex\ccx-model-catalog.json",
     [string]$OutputDirectory = ''
@@ -33,7 +32,7 @@ try {
     Copy-Tree -From $repoRoot -To $stage -ExcludeNames @('dist', '.git', 'payload')
 
     if ($Private) {
-        foreach ($path in @($SourceCcxConfigPath, $SourceCcxBinaryPath, $SourceCodexConfigPath, $SourceModelCatalogPath)) {
+        foreach ($path in @($SourceCcxConfigPath, $SourceCodexConfigPath, $SourceModelCatalogPath)) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
                 throw "Required private source not found: $path"
             }
@@ -48,15 +47,10 @@ try {
 
         $null = Get-Content -LiteralPath $SourceCcxConfigPath -Raw | ConvertFrom-Json
         $null = Get-Content -LiteralPath $SourceModelCatalogPath -Raw | ConvertFrom-Json
-        $binaryHeader = [System.IO.File]::ReadAllBytes($SourceCcxBinaryPath)[0..1]
-        if ($binaryHeader[0] -ne 0x4D -or $binaryHeader[1] -ne 0x5A) {
-            throw "SourceCcxBinaryPath is not a Windows executable: $SourceCcxBinaryPath"
-        }
 
         $privateDir = Join-Path $stage 'payload\private'
         New-Item -ItemType Directory -Force -Path $privateDir | Out-Null
         Copy-Item -LiteralPath $SourceCcxConfigPath -Destination (Join-Path $privateDir 'ccx-config.json') -Force
-        Copy-Item -LiteralPath $SourceCcxBinaryPath -Destination (Join-Path $privateDir 'ccx-go.exe') -Force
         Copy-Item -LiteralPath $SourceModelCatalogPath -Destination (Join-Path $privateDir 'ccx-model-catalog.json') -Force
         [System.IO.File]::WriteAllText(
             (Join-Path $privateDir 'proxy-token.txt'),
